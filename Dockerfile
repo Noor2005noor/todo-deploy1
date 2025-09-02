@@ -1,16 +1,16 @@
-# Use JDK runtime image
-FROM openjdk:21-jdk-slim
-
-# Set working directory
+# First stage: build the JAR
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Copy your jar (adjust the name if needed)
-COPY target/BootTask01-0.0.1-SNAPSHOT.jar app.jar
-
-# Expose port
+# Second stage: run the JAR
+FROM openjdk:21-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-
-# Run the jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
 
 
